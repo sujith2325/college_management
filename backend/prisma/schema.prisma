@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_id    Int       @id @default(autoincrement())
+  name       String
+  email      String    @unique
+  password   String
+  role       String
+  created_at DateTime  @default(now())
+  student    Student?
+}
+
+model Student {
+  student_id    Int         @id @default(autoincrement())
+  user_id       Int         @unique
+  usn           String      @unique
+  first_name    String
+  last_name     String
+  year          Int?
+  dob           DateTime?
+  gender        String?
+  phone         String?
+  address       String?
+  department_id Int?
+  user          User        @relation(fields: [user_id], references: [user_id])
+  department    Department? @relation(fields: [department_id], references: [department_id])
+  enrollments   Enrollment[]
+  attendance    Attendance[]
+  marks         Mark[]
+  fees          Fee[]
+}
+
+model Department {
+  department_id   Int          @id @default(autoincrement())
+  department_name String
+  hod_name        String?
+  students        Student[]
+  faculty         Faculty[]
+  courses         Course[]
+  laboratories    Laboratory[]
+}
+
+model Faculty {
+  faculty_id    Int        @id @default(autoincrement())
+  department_id Int
+  faculty_name  String
+  salary        Float?
+  email         String?
+  department    Department @relation(fields: [department_id], references: [department_id])
+}
+
+model Course {
+  course_id     Int          @id @default(autoincrement())
+  department_id Int
+  course_name   String
+  credits       Int?
+  semester      Int?
+  department    Department   @relation(fields: [department_id], references: [department_id])
+  enrollments   Enrollment[]
+  attendance    Attendance[]
+  marks         Mark[]
+}
+
+model Enrollment {
+  enrollment_id Int      @id @default(autoincrement())
+  student_id    Int
+  course_id     Int
+  enrolled_date DateTime @default(now())
+  student       Student  @relation(fields: [student_id], references: [student_id])
+  course        Course   @relation(fields: [course_id], references: [course_id])
+}
+
+model Attendance {
+  attendance_id   Int      @id @default(autoincrement())
+  student_id      Int
+  course_id       Int
+  attendance_date DateTime
+  status          String
+  student         Student  @relation(fields: [student_id], references: [student_id])
+  course          Course   @relation(fields: [course_id], references: [course_id])
+}
+
+model Mark {
+  marks_id       Int     @id @default(autoincrement())
+  student_id     Int
+  course_id      Int
+  internal_marks Int?
+  external_marks Int?
+  total_marks    Int?
+  student        Student @relation(fields: [student_id], references: [student_id])
+  course         Course  @relation(fields: [course_id], references: [course_id])
+}
+
+model Fee {
+  fee_id       Int      @id @default(autoincrement())
+  student_id   Int
+  total_fee    Float?
+  paid_fee     Float?
+  balance_fee  Float?
+  payment_date DateTime?
+  student      Student  @relation(fields: [student_id], references: [student_id])
+}
+
+model Laboratory {
+  lab_id        Int        @id @default(autoincrement())
+  lab_name      String
+  department_id Int
+  capacity      Int?
+  department    Department @relation(fields: [department_id], references: [department_id])
+}
